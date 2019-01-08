@@ -4,16 +4,27 @@ Below is the instructions of how to build image for ROCK Pi 4.
 
 ## Get the source code
 
+Note that here the non-root user is  jack and we are at the home folder.
+
+    $ cd ~
+    $ pwd
+    /home/jack
+
+When you have a different name, like rose, you can replace jack with rose in the next parts of this guide.
+
+Command prepended by $ means the command may be executed by an unprivileged user.  And command prepended by # means the command may be executed by an privileged user. But the symbol, $ or #, is not part of the command.
+
 You need Git to get multiple git repositories to build the image.
 
 Install Git if you don't have it.
 
-    sudo apt-get update
-    sudo apt-get install git
+    $ sudo apt-get update && sudo apt-get upgrade
+    $ sudo apt-get install git
 
 Clone the source code
 
-    git clone --recursive https://github.com/radxa/rockchip-bsp.git
+    $ cd ~
+    $ git clone --recursive https://github.com/radxa/rockchip-bsp.git
 
 You will get 
 
@@ -39,95 +50,181 @@ Directories usage introductions:
 * docker:
     * Init a ubuntu 16.04 build environment for easier building u-boot, kernel, rootfs and system.
 
-## Use docker
+## Build images
 
-Install Docker
+Two methods of building images will be shown in the next parts. One uses Docker (Part one) and the other doesn't (Part two). Just select one part and start to build your wanted images.
 
-    sudo apt-get update
-    sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo apt-get install docker-ce
+### Part one
 
-Go to the rockchip-bsp SDK top level directory.
+#### Install Docker
 
-Note that <rockchip-bsp dir> is the absolute path with / for rockchip-bsp SDK.
+    $ sudo apt-get update
+    $ sudo apt-get install \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        software-properties-common
+    $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    $ sudo apt-key fingerprint 0EBFCD88
 
-    cd docker
+    pub   4096R/0EBFCD88 2017-02-22
+          Key fingerprint = 9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+    uid                  Docker Release (CE deb) <docker@docker.com>
+    sub   4096R/F273FCD8 2017-02-22
 
-Build a docker image, called rockchip-radxa:1.
+    $ sudo add-apt-repository \
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+       $(lsb_release -cs) \
+       stable"
 
-    sudo docker build -t rockchip-radxa:1 -f ./Dockerfile .
+    $ sudo apt-get update
+    $ sudo apt-get install docker-ce
+    $ apt-cache madison docker-ce
 
-Run a Docker container
+    docker-ce | 18.09.0~ce-0~ubuntu | https://download.docker.com/linux/ubuntu xenial/stable amd64 Packages
 
-    docker run -it -v <rockchip-bsp dir>:/root rockchip /bin/bash
+    $ sudo apt-get install docker-ce=<VERSION>
+
+Go to the docker folder.
+
+    $ cd ~/rockchip-bsp/docker
+
+Build a Docker image, called rockchip-radxa:1.
+
+    $ sudo docker build -t rockchip-radxa:1 -f ./Dockerfile .
+
+Now the Docker image, rockchip-radxa:1, is ready. You just need to build Docker image once. Everytime you want to build images, just run a Docker container.
+
+#### Run a Docker container
+
+    $ docker run -it -v /home/jack/rockchip-bsp:/root rockchip /bin/bash
 
 Now the Docker container should be running.
 
-    cd /root
+Here Docker bind mounts /home/jack/rockchip-bsp in the host to /root in the Docker container. cd /root and ls will show:
 
-Here Docker bind mounts <rockchip-bsp dir> in the host to /root in the Docker container.
+    # cd /root
+    # ls
+    build  kernel  README.md  rkbin  rootfs  u-boot
 
-To build u-boot, kernel, rootfd image and system image, just follow the instructions in the following sections.
+#### Build u-boot
 
-After getting all the wanted images, exit Docker;
-
-    exit
-
-In the host, all the images are in the rockchip-bsp directory.
-
-## Install toolchain and other build tools
-
-    sudo apt-get install gcc-aarch64-linux-gnu device-tree-compiler libncurses5 libncurses5-dev build-essential libssl-dev mtools bc python dosfstools
-
-## Build u-boot/
-
-
-    ./build/mk-uboot.sh rockpi4b     #For ROCK Pi 4 Mode B
+    # cd /root
+    # ./build/mk-uboot.sh rockpi4b     #For ROCK Pi 4 Mode B
 
 The generated images will be copied to out/u-boot folder
 
-    ls out/u-boot/
+    # ls out/u-boot/
     idbloader.img  rk3399_loader_v1.12.112.bin  trust.img  uboot.img
 
-## Build kernel
+#### Build kernel
 
-    ./build/mk-kernel.sh rockpi4b    #For ROCK Pi 4 Mode B
+    # ./build/mk-kernel.sh rockpi4b    #For ROCK Pi 4 Mode B
 
 You will get the kernel image and dtb file
 
-    ls out/kernel/
+    # ls out/kernel/
     Image  rockpi-4b-linux.dtb
 
-## Make rootfs image
+#### Make rootfs image
 
 To build 32bit rootfs:
 
-    export ARCH=armhf
+    # export ARCH=armhf
 
 To build 64bit rootfs:
 
-    export ARCH=arm64
+    # export ARCH=arm64
 
 Building a base debian system by ubuntu-build-service from linaro.
 
-    cd rootfs
-    sudo apt-get install binfmt-support qemu-user-static gdisk
-    sudo dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
-    sudo apt-get install -f
-    RELEASE=stretch TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+    # cd rootfs
+    # dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
+    # apt-get install -f
+    # RELEASE=stretch TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+
+This will bootstrap a Debian stretch image, you will get a rootfs tarball named `linaro-stretch-alip-xxxx.tar.gz`.
+
+Building the rk-debain rootfs with debug:
+
+    # VERSION=debug ARCH=${ARCH} ./mk-rootfs-stretch.sh  && ./mk-image.sh
+
+This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
+
+#### Combine everything into one image
+
+    # build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
+
+This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is
+
+    out/system.img
+
+#### Exit Docker
+
+After getting all the wanted images, exit Docker;
+
+    # exit
+
+In the host, all generated images are in the ~/rockchip-bsp/out directory.
+
+### Part two
+
+When you don't want to use Docker to build images, you can try this way.
+
+Note that if you just used Docker to build the images, then you can't wait to try the new method, there may be operational permissions issues.
+
+#### Install toolchain and other build tools
+
+    $ sudo apt-get install gcc-aarch64-linux-gnu device-tree-compiler libncurses5 libncurses5-dev build-essential libssl-dev mtools bc python dosfstools
+
+#### Build u-boot/
+
+    $ cd ~/rockchip-bsp
+    $ ./build/mk-uboot.sh rockpi4b     #For ROCK Pi 4 Mode B
+
+The generated images will be copied to out/u-boot folder
+
+    $ ls out/u-boot/
+    idbloader.img  rk3399_loader_v1.12.112.bin  trust.img  uboot.img
+
+#### Build kernel
+
+    $ ./build/mk-kernel.sh rockpi4b    #For ROCK Pi 4 Mode B
+
+You will get the kernel image and dtb file
+
+    $ ls out/kernel/
+    Image  rockpi-4b-linux.dtb
+
+#### Make rootfs image
+
+To build 32bit rootfs:
+
+    $ export ARCH=armhf
+
+To build 64bit rootfs:
+
+    $ export ARCH=arm64
+
+Building a base debian system by ubuntu-build-service from linaro.
+
+    $ cd rootfs
+    $ sudo apt-get install binfmt-support qemu-user-static gdisk
+    $ sudo dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
+    $ sudo apt-get install -f
+    $ RELEASE=stretch TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
 
 This will bootstrap a Debian stretch image, you will get a rootfs tarball named `linaro-stretch-alip-xxxx.tar.gz`. 
 
 Building the rk-debain rootfs with debug:
 
-    VERSION=debug ARCH=${ARCH} ./mk-rootfs-stretch.sh  && ./mk-image.sh
+    $ VERSION=debug ARCH=${ARCH} ./mk-rootfs-stretch.sh  && ./mk-image.sh
 
 This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
 
-## Combine everything into one image
+#### Combine everything into one image
 
-    build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
+    $ build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
 
 This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is 
 
