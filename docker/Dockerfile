@@ -19,7 +19,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         ca-certificates \
         ccache \
         cmake \
-        cpio \
+        cpio \ 
         crossbuild-essential-arm64 \
         curl \
         device-tree-compiler \
@@ -30,24 +30,25 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         dpkg-dev \
         fakeroot \
         flex \
+        gcc-aarch64-linux-gnu \
         gdisk \
         git \
         kmod \
+        libncurses5 \
+        libncurses5-dev \
         libssl-dev \
         locales \
         mtools \
         parted \
         pkg-config \
         pv \
-        python-dev \
+        python \
         python3-dev \
+        python-dev \
         qemu-user-static \
         sudo \
         swig \
         udev \
-        gcc-aarch64-linux-gnu \
-        libncurses5 \
-        libncurses5-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the locale
