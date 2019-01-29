@@ -4,7 +4,7 @@ Below is the instructions of how to build image for ROCK Pi 4.
 
 ## Get the source code
 
-Note that here the non-root user is  jack and we are at the home folder.
+Note that here the non-root user is jack and we are at the home folder.
 
     $ cd ~
     $ pwd
@@ -97,7 +97,7 @@ Now the Docker image, rockchip-radxa:1, is ready. You just need to build Docker 
 
 #### Run a Docker container
 
-    $ docker run -it -v /home/jack/rockchip-bsp:/root rockchip /bin/bash
+    $ docker run -it -v /home/jack/rockchip-bsp:/root rockchip-radxa:1 /bin/bash
 
 Now the Docker container should be running.
 
