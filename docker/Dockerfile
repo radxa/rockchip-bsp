@@ -49,6 +49,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         sudo \
         swig \
         udev \
+        live-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the locale
