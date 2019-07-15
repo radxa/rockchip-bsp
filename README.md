@@ -59,6 +59,7 @@ Two methods of building images will be shown in the next parts. One uses Docker 
 #### Install Docker
 
     $ sudo apt-get update
+    $ sudo apt-get install binfmt-support qemu-user-static
     $ sudo apt-get install \
         apt-transport-https \
         ca-certificates \
@@ -97,7 +98,7 @@ Now the Docker image, rockchip-radxa:1, is ready. You just need to build Docker 
 
 #### Run a Docker container
 
-    $ docker run -it -v /home/jack/rockchip-bsp:/root rockchip-radxa:1 /bin/bash
+    $ docker run --privileged -it -v /home/jack/rockchip-bsp:/root rockchip-radxa:1 /bin/bash
 
 Now the Docker container should be running.
 
