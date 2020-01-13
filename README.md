@@ -224,7 +224,13 @@ This will install Rockchip specified packages and hooks on the standard Debian r
 
 #### Combine everything into one image
 
+Generate system image with two partitions.
+
     $ build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
+
+Generate ROCK Pi 4 system image with five partitions.
+
+    $ build/mk-image.sh -c rk3399 -b rockpi4 -t system -r rootfs/linaro-rootfs.img
 
 This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is 
 
