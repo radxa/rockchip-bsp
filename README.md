@@ -1,6 +1,6 @@
 # Rockchip Debian SDK
 
-Below is the instructions of how to build image for ROCK Pi 4.
+Below is the instructions of how to build image for ROCK Pi 4 on a HOST PC.
 
 ## Get the source code
 
@@ -23,8 +23,10 @@ Install Git if you don't have it.
 
 Clone the source code
 
-    $ cd ~
-    $ git clone --recursive https://github.com/radxa/rockchip-bsp.git
+    $ git clone -b master https://github.com/radxa/rockchip-bsp.git
+    $ cd rockchip-bsp
+    $ git submodule init
+    $ git submodule update
 
 You will get 
 
@@ -42,13 +44,23 @@ Directories usage introductions:
     * Prebuilt Rockchip binaries, include first stage loader and ATF(Arm Trustzone Firmware).
 
 * rootfs:
-    * Bootstrap a Debian based rootfs, support architechture armhf and arm64, support Debian Jessie and Stretch.
+    * Bootstrap a Debian based rootfs, support architechture armhf and arm64, support Debian Jessie, Stretch and Buster.
 
 * u-boot:
     * u-boot as the second stage bootloader
 
 * docker:
     * Init a ubuntu 16.04 build environment for easier building u-boot, kernel, rootfs and system.
+
+## Update the source code
+
+The rockchip-bsp will be updated all the time, so you can update the source to get more fearures before building the system image.
+
+    $ cd ~/rockchip-bsp
+    $ git checkout master
+    $ git fetch origin
+    $ git rebase origin/master
+    $ git submodule update
 
 ## Build images
 
@@ -142,19 +154,25 @@ Building a base debian system by ubuntu-build-service from linaro.
     # cd rootfs
     # dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
     # apt-get install -f
-    # RELEASE=stretch TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+    # RELEASE=buster TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
 
-This will bootstrap a Debian stretch image, you will get a rootfs tarball named `linaro-stretch-alip-xxxx.tar.gz`.
+This will bootstrap a Debian buster image, you will get a rootfs tarball named `linaro-buster-alip-xxxx.tar.gz`.
 
 Building the rk-debain rootfs with debug:
 
-    # VERSION=debug ARCH=${ARCH} ./mk-rootfs-stretch.sh  && ./mk-image.sh
+    # VERSION=debug ARCH=${ARCH} ./mk-rootfs-buster.sh  && ./mk-image.sh
 
 This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
 
 #### Combine everything into one image
 
+Generate system image with two partitions.
+
     # build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
+
+Generate ROCK Pi 4 system image with five partitions.
+
+    # build/mk-image.sh -c rk3399 -b rockpi4 -t system -r rootfs/linaro-rootfs.img
 
 This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is
 
@@ -174,7 +192,19 @@ When you don't want to use Docker to build images, you can try this way.
 
 Note that if you just used Docker to build the images, then you can't wait to try the new method, there may be operational permissions issues.
 
-#### Install toolchain and other build tools
+#### Install toolchain from Linaro
+
+    $ wget https://releases.linaro.org/components/toolchain/binaries/7.3-2018.05/aarch64-linux-gnu/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+    $ sudo tar xvf gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz  -C /usr/local/
+    $ export CROSS_COMPILE=/usr/local/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+    $ export PATH=/usr/local/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin:$PATH
+
+Check if Linaro toolchain is the default choice:
+
+    $ which aarch64-linux-gnu-gcc
+    $ /usr/local/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc
+
+#### Install other build build tools
 
     $ sudo apt-get install gcc-aarch64-linux-gnu device-tree-compiler libncurses5 libncurses5-dev build-essential libssl-dev mtools bc python dosfstools
 
@@ -213,13 +243,13 @@ Building a base debian system by ubuntu-build-service from linaro.
     $ sudo apt-get install binfmt-support qemu-user-static gdisk
     $ sudo dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
     $ sudo apt-get install -f
-    $ RELEASE=stretch TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+    $ RELEASE=buster TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
 
-This will bootstrap a Debian stretch image, you will get a rootfs tarball named `linaro-stretch-alip-xxxx.tar.gz`. 
+This will bootstrap a Debian buster image, you will get a rootfs tarball named `linaro-buster-alip-xxxx.tar.gz`.
 
 Building the rk-debain rootfs with debug:
 
-    $ VERSION=debug ARCH=${ARCH} ./mk-rootfs-stretch.sh  && ./mk-image.sh
+    $ VERSION=debug ARCH=${ARCH} ./mk-rootfs-buster.sh  && ./mk-image.sh
 
 This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
 
