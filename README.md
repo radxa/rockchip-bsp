@@ -1,6 +1,6 @@
 # Rockchip Debian SDK
 
-Below is the instructions of how to build image for ROCK Pi 4 on a HOST PC.
+Below is the instructions of how to build image for ROCK 5 on a HOST PC.
 
 ## Get the source code
 
@@ -23,7 +23,7 @@ Install Git if you don't have it.
 
 Clone the source code
 
-    $ git clone -b master https://github.com/radxa/rockchip-bsp.git
+    $ git clone -b stable-5.10-rock5 https://github.com/radxa/rockchip-bsp.git
     $ cd rockchip-bsp
     $ git submodule init
     $ git submodule update
@@ -38,7 +38,7 @@ Directories usage introductions:
     * Some script files and configuration files for building u-boot, kernel and rootfs.
 
 * kernel:
-    * kernel source code, current version is 4.4
+    * kernel source code, current version is 5.10
 
 * rkbin:
     * Prebuilt Rockchip binaries, include first stage loader and ATF(Arm Trustzone Firmware).
@@ -50,16 +50,16 @@ Directories usage introductions:
     * u-boot as the second stage bootloader
 
 * docker:
-    * Init a ubuntu 16.04 build environment for easier building u-boot, kernel, rootfs and system.
+    * Init a ubuntu 20.04 build environment for easier building u-boot, kernel, rootfs and system.
 
 ## Update the source code
 
 The rockchip-bsp will be updated all the time, so you can update the source to get more fearures before building the system image.
 
     $ cd ~/rockchip-bsp
-    $ git checkout master
+    $ git checkout stable-5.10-rock5
     $ git fetch origin
-    $ git rebase origin/master
+    $ git rebase origin/stable-5.10-rock5
     $ git submodule update
 
 ## Build images
@@ -123,21 +123,21 @@ Here Docker bind mounts /home/jack/rockchip-bsp in the host to /root in the Dock
 #### Build u-boot
 
     # cd /root
-    # ./build/mk-uboot.sh rockpi4b     #For ROCK Pi 4 Mode B
+    # ./build/mk-uboot.sh rk3588-rock-5b    #For ROCK 5B
 
 The generated images will be copied to out/u-boot folder
 
     # ls out/u-boot/
-    idbloader.img  rk3399_loader_v1.12.112.bin  trust.img  uboot.img
+    idbloader.img  rk3588_spl_loader_v1.07.111.bin  spi  u-boot.itb
 
 #### Build kernel
 
-    # ./build/mk-kernel.sh rockpi4b    #For ROCK Pi 4 Mode B
+    # ./build/mk-kernel.sh rk3588-rock5b    #For ROCK 5B
 
 You will get the kernel image and dtb file
 
     # ls out/kernel/
-    Image  rockpi-4b-linux.dtb
+    Image  rk3588-rock-5b.dtb
 
 #### Make rootfs image
 
@@ -211,21 +211,21 @@ Check if Linaro toolchain is the default choice:
 #### Build u-boot/
 
     $ cd ~/rockchip-bsp
-    $ ./build/mk-uboot.sh rockpi4b     #For ROCK Pi 4 Mode B
+    $ ./build/mk-uboot.sh rk3588-rock-5b     #For ROCK 5B
 
 The generated images will be copied to out/u-boot folder
 
     $ ls out/u-boot/
-    idbloader.img  rk3399_loader_v1.12.112.bin  trust.img  uboot.img
+    idbloader.img  rk3588_spl_loader_v1.07.111.bin  spi  u-boot.itb
 
 #### Build kernel
 
-    $ ./build/mk-kernel.sh rockpi4b    #For ROCK Pi 4 Mode B
+    $ ./build/mk-kernel.sh rk3588-rock-5b    #For ROCK 5B
 
 You will get the kernel image and dtb file
 
     $ ls out/kernel/
-    Image  rockpi-4b-linux.dtb
+    Image  rk3588-rock-5b.dtb
 
 #### Make rootfs image
 
@@ -257,11 +257,7 @@ This will install Rockchip specified packages and hooks on the standard Debian r
 
 Generate system image with two partitions.
 
-    $ build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
-
-Generate ROCK Pi 4 system image with five partitions.
-
-    $ build/mk-image.sh -c rk3399 -b rockpi4 -t system -r rootfs/linaro-rootfs.img
+    $ build/mk-image.sh -c rk3588 -t system -r rootfs/linaro-rootfs.img
 
 This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is 
 
