@@ -44,7 +44,7 @@ Directories usage introductions:
     * Prebuilt Rockchip binaries, include first stage loader and ATF(Arm Trustzone Firmware).
 
 * rootfs:
-    * Bootstrap a Debian based rootfs, support architechture armhf and arm64, support Debian Jessie, Stretch and Buster.
+    * Bootstrap a Debian based rootfs, support architechture armhf and arm64, support Debian Bullseye.
 
 * u-boot:
     * u-boot as the second stage bootloader
@@ -132,7 +132,7 @@ The generated images will be copied to out/u-boot folder
 
 #### Build kernel
 
-    # ./build/mk-kernel.sh rk3588-rock5b    #For ROCK 5B
+    # ./build/mk-kernel.sh rk3588-rock-5b    #For ROCK 5B
 
 You will get the kernel image and dtb file
 
@@ -154,13 +154,13 @@ Building a base debian system by ubuntu-build-service from linaro.
     # cd rootfs
     # dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
     # apt-get install -f
-    # RELEASE=buster TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+    # RELEASE=bullseye TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
 
-This will bootstrap a Debian buster image, you will get a rootfs tarball named `linaro-buster-alip-xxxx.tar.gz`.
+This will bootstrap a Debian Bullseye image, you will get a rootfs tarball named `linaro-bullseye-alip-xxxx.tar.gz`.
 
 Building the rk-debain rootfs with debug:
 
-    # VERSION=debug ARCH=${ARCH} ./mk-rootfs-buster.sh  && ./mk-image.sh
+    # VERSION=debug ARCH=${ARCH} ./mk-rootfs-bullseye.sh  && ./mk-image.sh
 
 This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
 
@@ -168,11 +168,7 @@ This will install Rockchip specified packages and hooks on the standard Debian r
 
 Generate system image with two partitions.
 
-    # build/mk-image.sh -c rk3399 -t system -r rootfs/linaro-rootfs.img
-
-Generate ROCK Pi 4 system image with five partitions.
-
-    # build/mk-image.sh -c rk3399 -b rockpi4 -t system -r rootfs/linaro-rootfs.img
+    # build/mk-image.sh -c rk3588 -t system -r rootfs/linaro-rootfs.img
 
 This will combine u-boot, kernel and rootfs into one image and generate GPT partition table. Output is
 
@@ -243,13 +239,13 @@ Building a base debian system by ubuntu-build-service from linaro.
     $ sudo apt-get install binfmt-support qemu-user-static gdisk
     $ sudo dpkg -i ubuntu-build-service/packages/*        # ignore the broken dependencies, we will fix it next step
     $ sudo apt-get install -f
-    $ RELEASE=buster TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
+    $ RELEASE=bullseye TARGET=desktop ARCH=${ARCH} ./mk-base-debian.sh
 
-This will bootstrap a Debian buster image, you will get a rootfs tarball named `linaro-buster-alip-xxxx.tar.gz`.
+This will bootstrap a Debian bullseye image, you will get a rootfs tarball named `linaro-bullseye-alip-xxxx.tar.gz`.
 
 Building the rk-debain rootfs with debug:
 
-    $ VERSION=debug ARCH=${ARCH} ./mk-rootfs-buster.sh  && ./mk-image.sh
+    $ VERSION=debug ARCH=${ARCH} ./mk-rootfs-bullseye.sh  && ./mk-image.sh
 
 This will install Rockchip specified packages and hooks on the standard Debian rootfs and generate an ext4 format rootfs image at `rootfs/linaro-rootfs.img` .
 
@@ -265,11 +261,9 @@ This will combine u-boot, kernel and rootfs into one image and generate GPT part
 
 ## Flash the image
 
-For normal users, follow instructions [installation](http://wiki.radxa.com/Rockpi4/install). You will need the generated '''out/system.img''' only.
-
-For developers, flash from USB OTG port, follow instructions [usb-installation](http://wiki.radxa.com/Rockpi4/dev/usb-install). You will need the flash helper '''rk3399_loader_xxx.bin''' and generated '''out/system.img''' files.
+Please follow instructions [installation](https://wiki.radxa.com/Rock5/install).
 
 ## Troubleshooting
 
-Go to [ROCK Pi 4 FAQs](http://wiki.radxa.com/Rockpi4/FAQs)
+Go to [ROCK 5 FAQs](http://wiki.radxa.com/Rock5/FAQs)
 
